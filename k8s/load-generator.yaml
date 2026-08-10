@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+        sidecar.istio.io/inject: "false" # Prevent Istio sidecar overhead for the load generator itself
+    spec:
+      containers:
+      - name: hey
+        image: williamyeh/hey
+        command: ["/bin/sh", "-c"]
+        args:
+        # -q 50 = 50 req/sec per worker. -c 4 = 4 workers. Total = exactly 200 req/sec per pod.
+        # -z 60m = run for 60 minutes
+        - "hey -z 60m -q 50 -c 4 http://frontend-service:3000/" 

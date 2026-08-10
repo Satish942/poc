@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle-deployment
+  labels:
+    app: oracle-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oracle-db
+  template:
+    metadata:
+      labels:
+        app: oracle-db
+    spec:
+      containers:
+      - name: oracle-db
+        image: gvenzl/oracle-free:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: ORACLE_PASSWORD
+          value: "YourOraclePassword123"
+        ports:
+        - containerPort: 1521
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: oracle-db
+  ports:
+    - protocol: TCP
+      port: 1521
+      targetPort: 1521

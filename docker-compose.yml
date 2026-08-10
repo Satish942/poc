@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./react-app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+  backend:
+    depends_on:
+      - oracle-db
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_URL=jdbc:oracle:thin:@//oracle-db:1521/FREEPDB1
+    networks:
+      - app-network
+
+  oracle-db:
+    image: gvenzl/oracle-free:latest
+    container_name: oracle-db
+    environment:
+      - ORACLE_PASSWORD=YourOraclePassword123
+    ports:
+      - "1521:1521"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
